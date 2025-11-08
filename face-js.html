@@ -46,7 +46,7 @@
 
   <p id="status">Status: memuat face-api.js dan model...</p>
 
-  <!-- Gambar uji HARUS sama dengan yang digunakan di versi WASM -->
+  <!-- Gunakan gambar uji yang sama dengan versi WASM -->
   <img id="test-image" src="test-face.jpg" alt="Test face image">
 
   <div>
@@ -60,7 +60,6 @@
   <div id="log"></div>
 
   <!-- ======================= face-api.js CDN ======================= -->
-  <!-- Versi bundling yang sudah include tfjs -->
   <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 
   <script>
@@ -68,17 +67,14 @@
     const runBtn = document.getElementById('run-btn');
     const logEl = document.getElementById('log');
     const summaryEl = document.getElementById('summary');
-
     let modelsLoaded = false;
 
-    // ================== Load model face-api.js ==================
+    // ================== Load model face-api.js dari CDN ==================
     async function loadModels() {
       try {
-        // Folder 'models/' harus berisi file model tiny_face_detector
-        // seperti: tiny_face_detector_model-weights_manifest.json dan .bin
-        const MODEL_URL = '';
+        const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights/';
 
-        statusEl.textContent = 'Status: memuat model tiny_face_detector...';
+        statusEl.textContent = 'Status: memuat model tiny_face_detector dari CDN...';
 
         await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
 
@@ -86,7 +82,7 @@
         statusEl.textContent = 'Status: model face-api.js siap.';
         runBtn.disabled = false;
 
-        console.log('face-api.js models loaded');
+        console.log('face-api.js model loaded from', MODEL_URL);
       } catch (err) {
         console.error('Error loading models:', err);
         statusEl.textContent = 'Status: gagal memuat model face-api.js. Cek console.';
@@ -99,15 +95,12 @@
         throw new Error('Model face-api.js belum siap');
       }
 
-      // Parameter bisa Anda sesuaikan untuk trade-off kecepatan vs akurasi
       const options = new faceapi.TinyFaceDetectorOptions({
-        inputSize: 320,       // 160, 224, 320, 416, 512 (semakin besar, semakin lambat)
-        scoreThreshold: 0.5
+        inputSize: 320,        // ukuran input (semakin besar semakin akurat, tapi lambat)
+        scoreThreshold: 0.5    // confidence minimal
       });
 
-      // Deteksi semua wajah pada gambar
       const detections = await faceapi.detectAllFaces(imageElement, options);
-
       return { faces: detections.length };
     }
 
