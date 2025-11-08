@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Face Detection Benchmark - JavaScript</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 20px auto;
+      line-height: 1.5;
+    }
+    #log {
+      white-space: pre-wrap;
+      background: #f5f5f5;
+      padding: 10px;
+      border-radius: 4px;
+      max-height: 250px;
+      overflow-y: auto;
+      font-size: 13px;
+    }
+    img {
+      max-width: 300px;
+      display: block;
+      margin-bottom: 10px;
+    }
+    label {
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Face Detection Benchmark - JavaScript</h1>
+
+  <p>
+    Halaman ini digunakan untuk mengukur waktu eksekusi algoritma face detection
+    yang diimplementasikan dengan <strong>JavaScript murni</strong>.
+    Gunakan input "Iterations" untuk menjalankan deteksi beberapa kali dan
+    ambil nilai rata-ratanya.
+  </p>
+
+  <!-- Gambar uji harus sama dengan yang digunakan di versi WASM -->
+  <img id="test-image" src="test-face.jpg" alt="Test face image">
+
+  <div>
+    <label for="iterations">Iterations: </label>
+    <input type="number" id="iterations" value="10" min="1" max="1000">
+    <button id="run-btn">Run Benchmark (JS)</button>
+  </div>
+
+  <h3>Hasil</h3>
+  <p id="summary">Belum ada pengujian.</p>
+  <div id="log"></div>
+
+  <script>
+    // =============================
+    // 1. Fungsi face detection JS
+    // =============================
+    /**
+     * TODO: Ganti isi fungsi ini dengan pemanggilan face detection JS Anda.
+     * Contoh:
+     *   - face-api.js → await faceapi.detectAllFaces(img, new faceapi.TinyFaceDetectorOptions())
+     *   - OpenCV.js JS-only (tanpa WASM) → proses cv.Mat dsb.
+     *
+     * Di sini saya buat versi dummy (simulasi) dengan setTimeout supaya
+     * struktur benchmark jelas. Anda tinggal ganti bagian yang ditandai.
+     */
+    async function detectFaceJs(imageElement) {
+      // ====== GANTI BAGIAN INI DENGAN IMPLEMENTASI SEBENARNYA ======
+      // Contoh dummy: simulasi proses 80 ms
+      await new Promise(resolve => setTimeout(resolve, 80));
+
+      // Misal return jumlah wajah terdeteksi
+      return { faces: 1 };
+      // =============================================================
+    }
+
+    // =============================
+    // 2. Fungsi benchmarking
+    // =============================
+    async function runBenchmarkJs() {
+      const img = document.getElementById('test-image');
+      const iterInput = document.getElementById('iterations');
+      const iterations = parseInt(iterInput.value, 10) || 1;
+
+      const logEl = document.getElementById('log');
+      const summaryEl = document.getElementById('summary');
+
+      logEl.textContent = "Running JavaScript benchmark...\n";
+      console.clear();
+      console.log("===== JavaScript Face Detection Benchmark =====");
+
+      const times = [];
+
+      for (let i = 0; i < iterations; i++) {
+        const t0 = performance.now();
+        const result = await detectFaceJs(img);
+        const t1 = performance.now();
+        const execTime = t1 - t0;
+
+        times.push(execTime);
+
+        const line = `Iterasi ${i + 1}: ${execTime.toFixed(2)} ms, faces = ${result.faces}\n`;
+        logEl.textContent += line;
+        console.log(line.trim());
+      }
+
+      // Hitung statistik sederhana
+      const sum = times.reduce((a, b) => a + b, 0);
+      const avg = sum / times.length;
+      const min = Math.min(...times);
+      const max = Math.max(...times);
+
+      const summaryText =
+        `JavaScript - Iterations: ${iterations}\n` +
+        `Rata-rata: ${avg.toFixed(2)} ms\n` +
+        `Min: ${min.toFixed(2)} ms, Max: ${max.toFixed(2)} ms`;
+
+      summaryEl.textContent = summaryText;
+      logEl.textContent += "\n" + summaryText + "\n";
+
+      // Log ke console.table agar mudah diekspor
+      console.table(times.map((t, idx) => ({
+        iteration: idx + 1,
+        time_ms: t
+      })));
+    }
+
+    // =============================
+    // 3. Event binding
+    // =============================
+    document.getElementById('run-btn').addEventListener('click', () => {
+      runBenchmarkJs().catch(err => {
+        console.error(err);
+        document.getElementById('log').textContent += "\nError: " + err.message;
+      });
+    });
+
+    // Opsional: langsung jalan saat halaman load
+    // window.onload = () => runBenchmarkJs();
+  </script>
+</body>
+</html>
